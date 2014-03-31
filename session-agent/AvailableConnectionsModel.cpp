@@ -74,15 +74,24 @@ void AvailableConnectionsModel::setDevicePtr(const NetworkManager::Device::Ptr &
     removeRows(0, rowCount());
     qDebug() << Q_FUNC_INFO << device->uni() << device->type();
 
-    connect(device.data(), SIGNAL(activeConnectionChanged()), SLOT(activeConnectionChanged()));
-    connect(device.data(), SIGNAL(availableConnectionChanged()), SLOT(availableConnectionChanged()));
+    connect(device.data(), &Device::activeConnectionChanged,
+            this, &AvailableConnectionsModel::activeConnectionChanged);
+    connect(device.data(), &Device::availableConnectionChanged,
+            this, &AvailableConnectionsModel::availableConnectionChanged);
+
     if (device->type() == NetworkManager::Device::Wifi) {
         NetworkManager::WirelessDevice::Ptr wifi = device.dynamicCast<NetworkManager::WirelessDevice>();
-        connect(wifi.data(), SIGNAL(accessPointAppeared(QString)), SLOT(accessPointAppeared(QString)));
-        connect(wifi.data(), SIGNAL(accessPointDisappeared(QString)), SLOT(accessPointDisappeared(QString)));
+        connect(wifi.data(), &WirelessDevice::accessPointAppeared,
+                this, &AvailableConnectionsModel::accessPointAppeared);
+        connect(wifi.data(), &WirelessDevice::accessPointDisappeared,
+                this, &AvailableConnectionsModel::accessPointDisappeared);
+        connect(wifi.data(), &WirelessDevice::activeAccessPointChanged,
+                this, &AvailableConnectionsModel::activeAccessPointChanged);
         foreach (const QString &accessPoint, wifi->accessPoints()) {
             accessPointAppeared(accessPoint);
         }
+
+        activeAccessPointChanged();
     } else if (device->type() == NetworkManager::Device::Wimax) {
         NetworkManager::WimaxDevice::Ptr wiMax = device.dynamicCast<NetworkManager::WimaxDevice>();
         connect(wiMax.data(), SIGNAL(nspAppeared(QString)), SLOT(nspAppeared(QString)));
@@ -123,30 +132,11 @@ void AvailableConnectionsModel::availableConnectionChanged()
 void AvailableConnectionsModel::activeConnectionChanged()
 {
     ActiveConnection::Ptr activeConnection = m_device->activeConnection();
-    qDebug() << Q_FUNC_INFO << activeConnection.isNull();
+    qDebug() << Q_FUNC_INFO << activeConnection;
     if (activeConnection) {
-//        QString connectionPath = activeConnection->connection()->path();
+        QString connectionPath = activeConnection->connection()->path();
+        qDebug() << Q_FUNC_INFO << connectionPath;
 
-        if (m_device->type() == NetworkManager::Device::Wifi) {
-            NetworkManager::WirelessDevice::Ptr wifi = m_device.dynamicCast<NetworkManager::WirelessDevice>();
-            AccessPoint::Ptr activeAP = wifi->activeAccessPoint();
-            QString bssid;
-            if (activeAP) {
-                bssid = activeAP->hardwareAddress();
-            }
-
-            for (int i = 0; i < rowCount(); ++i) {
-                QStandardItem *stdItem = item(i);
-                qDebug() << "model" << i << bssid << stdItem->data(RoleBssid).toString() << stdItem->data(RoleNetworkID).toString();
-                bool active = bssid == stdItem->data(RoleBssid).toString();
-                if (stdItem->data(RoleActive).toBool() != active) {
-                    stdItem->setData(active, RoleActive);
-                    if (active) {
-                        updateDeviceStatus();
-                    }
-                }
-            }
-        }
 //        ConnectionSettings::Ptr settings = activeConnection->connection()->settings();
 //        WirelessSetting::Ptr wifiSetting = settings->setting(Setting::Wireless).dynamicCast<WirelessSetting>();
 //        if (!wifiSetting) {
@@ -282,6 +272,30 @@ void AvailableConnectionsModel::accessPointDisappeared(const QString &uni)
     QStandardItem *stdItem = findNetworkItem(uni);
     if (stdItem) {
         removeRow(stdItem->row());
+    }
+}
+
+void AvailableConnectionsModel::activeAccessPointChanged()
+{
+    NetworkManager::WirelessDevice::Ptr wifi = m_device.dynamicCast<NetworkManager::WirelessDevice>();
+    AccessPoint::Ptr activeAP = wifi->activeAccessPoint();
+    qDebug() << "activeAccessPointChanged::AP" << activeAP;
+
+    QString bssid;
+    if (activeAP) {
+        bssid = activeAP->hardwareAddress();
+    }
+
+    for (int i = 0; i < rowCount(); ++i) {
+        QStandardItem *stdItem = item(i);
+        qDebug() << "model" << i << bssid << stdItem->data(RoleBssid).toString() << stdItem->data(RoleNetworkID).toString();
+        bool active = bssid == stdItem->data(RoleBssid).toString();
+        if (stdItem->data(RoleActive).toBool() != active) {
+            stdItem->setData(active, RoleActive);
+            if (active) {
+                updateDeviceStatus();
+            }
+        }
     }
 }
 

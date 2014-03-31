@@ -80,6 +80,7 @@ private slots:
     void addConnection(const NetworkManager::Connection::Ptr &connection);
     void accessPointAppeared(const QString &uni);
     void accessPointDisappeared(const QString &uni);
+    void activeAccessPointChanged();
     void signalStrengthChanged(int strength);
     void nspAppeared(const QString &uni);
     void nspDisappeared(const QString &name);

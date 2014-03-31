@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
 {
     Q_INIT_RESOURCE(application);
 
-    QCoreApplication::setOrganizationName("7land");
-    QCoreApplication::setOrganizationDomain("ceciletti.com.br");
-    QCoreApplication::setApplicationName("nm");
-    QCoreApplication::setApplicationVersion("2013.12");
+    QCoreApplication::setOrganizationName("lemuri");
+    QCoreApplication::setOrganizationDomain("lemuri.org");
+    QCoreApplication::setApplicationName("lemuri-network-manager");
+    QCoreApplication::setApplicationVersion("0.1.0");
 
     QApplication app(argc, argv);
     app.setQuitOnLastWindowClosed(false);

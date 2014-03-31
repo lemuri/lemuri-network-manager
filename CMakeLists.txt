@@ -1,4 +1,4 @@
-project(lemuri-nm)
+project(lemuri-network-manager)
 
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules;${CMAKE_MODULE_PATH}")
@@ -52,16 +52,13 @@ if (NOT NETWORKMANAGERQT_FOUND)
     message(FATAL_ERROR "ERROR: NetworkManagerQt5 not found. http://projects.kde.org/libnm-qt")
 endif (NOT NETWORKMANAGERQT_FOUND)
 
-set(PLASMA_NM_VERSION "0.9.3.3-git")
+set(LEMURI_NM_VERSION "0.1.0")
 
 configure_file(config.h.cmake
                ${CMAKE_CURRENT_BINARY_DIR}/config.h )
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR} ${CMAKE_MODULE_PATH})
-#macro_optional_find_package(MobileBroadbandProviderInfo)
-#macro_log_feature(MOBILEBROADBANDPROVIDERINFO_FOUND "mobile-broadband-provider-info" "Database of mobile broadband service providers" "http://live.gnome.org/NetworkManager/MobileBroadband/ServiceProviders" FALSE "" "Needed for Mobile Connection Wizard support in Broadband Modem Management")
 
-#pkg_check_modules(QTNETWORK REQUIRED QtNetwork)
 pkg_check_modules(NETWORKMANAGER REQUIRED NetworkManager)
 
 add_definitions(
@@ -82,13 +79,4 @@ include_directories(
     ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-#add_subdirectory(lib)
-#add_subdirectory(applet)
-#add_subdirectory(declarative-plugins)
-#add_subdirectory(editor)
-#add_subdirectory(vpn)
-#add_subdirectory(kded)
-#add_subdirectory(settings)
 add_subdirectory(session-agent)
-
-#macro_display_feature_log()
